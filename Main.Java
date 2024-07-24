@@ -1,18 +1,22 @@
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 
 class Produto {
     protected String nome;
-    protected Double preco;
+    protected double preco;
 
-    public Produto(String nome, Double preco) {
+    public Produto(String nome, double preco) {
         this.nome = nome;
         this.preco = preco;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public double getPreco() {
+        return preco;
     }
 
     public String etiquetaPreco() {
@@ -21,78 +25,72 @@ class Produto {
 }
 
 class ProdutoImportado extends Produto {
-    private Double taxaAlfandega;
+    private double taxaAlfandega;
 
-    public ProdutoImportado(String nome, Double preco, Double taxaAlfandega) {
+    public ProdutoImportado(String nome, double preco, double taxaAlfandega) {
         super(nome, preco);
         this.taxaAlfandega = taxaAlfandega;
     }
 
-    public Double precoTotal() {
-        return preco + taxaAlfandega;
+    public double getPreco() {
+        return super.getPreco() + taxaAlfandega;
     }
 
-    
     public String etiquetaPreco() {
-        return nome + " R$ " + String.format("%.2f", precoTotal()) + " (Taxa alfândega: R$ " + String.format("%.2f", taxaAlfandega) + ")";
+        return nome + " R$ " + String.format("%.2f", getPreco()) + " (Taxa alfândega: R$ " + String.format("%.2f", taxaAlfandega) + ")";
     }
 }
 
 class ProdutoUsado extends Produto {
-    private Date dataFabricacao;
-    private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    private String dataFabricacao;
 
-    public ProdutoUsado(String nome, Double preco, Date dataFabricacao) {
+    public ProdutoUsado(String nome, double preco, String dataFabricacao) {
         super(nome, preco);
         this.dataFabricacao = dataFabricacao;
     }
 
-    
     public String etiquetaPreco() {
-        return nome + " (usado) R$ " + String.format("%.2f", preco) + " (Data de fabricação: " + sdf.format(dataFabricacao) + ")";
+        return nome + " (usado) R$ " + String.format("%.2f", preco) + " (Data de fabricação: " + dataFabricacao + ")";
     }
 }
 
 public class Main {
-    public static void main(String[] args) throws ParseException {
-        Locale.setDefault(new Locale("pt", "BR"));
-        Scanner sc = new Scanner(System.in);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
         List<Produto> produtos = new ArrayList<>();
 
-        System.out.print("Digite o número de produtos: ");
-        int n = sc.nextInt();
+        System.out.print("Digite a quantidade de produtos: ");
+        int N = scanner.nextInt();
 
-        for (int i = 1; i <= n; i++) {
-            System.out.println("Dados do produto #" + i + ":");
+        for (int i = 0; i < N; i++) {
+            System.out.println("Dados do produto #" + (i + 1) + ":");
             System.out.print("Comum, usado ou importado (c/u/i)? ");
-            char tipo = sc.next().charAt(0);
+            char tipo = scanner.next().charAt(0);
+            scanner.nextLine(); 
             System.out.print("Nome: ");
-            sc.nextLine();
-            String nome = sc.nextLine();
+            String nome = scanner.nextLine();
             System.out.print("Preço: ");
-            double preco = sc.nextDouble();
+            double preco = scanner.nextDouble();
 
-            if (tipo == 'c') {
+            if (tipo == 'c' || tipo == 'C') {
                 produtos.add(new Produto(nome, preco));
-            } else if (tipo == 'u') {
+            } else if (tipo == 'u' || tipo == 'U') {
+                scanner.nextLine();
                 System.out.print("Data de fabricação (DD/MM/YYYY): ");
-                Date data = sdf.parse(sc.next());
-                produtos.add(new ProdutoUsado(nome, preco, data));
-            } else if (tipo == 'i') {
+                String dataFabricacao = scanner.nextLine();
+                produtos.add(new ProdutoUsado(nome, preco, dataFabricacao));
+            } else if (tipo == 'i' || tipo == 'I') {
                 System.out.print("Taxa alfândega: ");
-                double taxaAlfandega = sc.nextDouble();
+                double taxaAlfandega = scanner.nextDouble();
                 produtos.add(new ProdutoImportado(nome, preco, taxaAlfandega));
             }
         }
 
-        System.out.println();
-        System.out.println("ETIQUETAS DE PREÇO:");
+        System.out.println("\nETIQUETAS DE PREÇO:");
         for (Produto prod : produtos) {
             System.out.println(prod.etiquetaPreco());
         }
 
-        sc.close();
+        scanner.close();
     }
 }
